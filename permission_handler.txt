@@ -1,4 +1,3 @@
---@include https://raw.githubusercontent.com/NekerSqu4w/my-starfall-library/main/uuid.txt as uuid.txt
 local uuid = require("uuid.txt")
 
 local has_active_permission = false
