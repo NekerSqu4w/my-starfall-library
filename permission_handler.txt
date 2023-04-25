@@ -1,0 +1,100 @@
+
+local UUIDLIST = {}
+local UUIDCHAR = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+local function uuid(length,compose_length)
+    length = length or 6
+    compose_length = compose_length or 4
+    local uuidstr = ""
+
+    for i=1, length do
+        local compose_id = ""
+        for i=1, compose_length do
+            compose_id = compose_id .. "" .. UUIDCHAR[math.random(1,#UUIDCHAR)]
+        end
+        uuidstr = uuidstr .. compose_id .. "-"
+    end
+    uuidstr = uuidstr:sub(1,#uuidstr-1)
+
+    --Regenerate if already exist
+    if UUIDLIST[uuidstr] then
+        return uuid()
+    end
+    return uuidstr
+end
+
+local has_active_permission = false
+local function setup_permission(perms,perm_info,on_accept,override_perm_screen)
+    perms = perms or {"render.screen"}
+    perm_info = perm_info or "Accept permission"
+    
+    local uid = uuid(6,4)
+    local missing_perms = {}
+
+    if type(perms) == "table" and has_active_permission == false then
+        table.insert(missing_perms,"render.screen")
+        for key, perm_id in pairs(perms) do
+            if hasPermission(perm_id) then else
+                missing_perms[#missing_perms+1] = perm_id
+            end
+        end
+
+        local perminfo = "Hello, you are missing some permission\nthat I need to work properly..\n\nPress your use key on this screen\nto accept these permission !"
+        setupPermissionRequest(missing_perms, perm_info, true)
+        local permission_font = render.createFont("FontAwesome",20,600,true,false,false,false,0,false,0)
+        hook.add("render","noperm_message_"..uid,function()
+            local scrw,scrh = render.getResolution()
+            if type(override_perm_screen) == "function" then
+                override_perm_screen(scrw,scrh,missing_perms)
+            else
+                render.setFont(permission_font)
+
+                render.setColor(Color(200,200,200))
+                render.drawRect(0,0,scrw,scrh)
+
+                local tw, th = render.getTextSize(perminfo)
+                render.setColor(Color(130,130,130))
+                render.drawRect(4,4,scrw-8,th+4)
+                render.setColor(Color(255,255,255))
+                render.drawText(8,4,perminfo)
+
+                render.setColor(Color(130,130,130))
+                render.drawRect(4,4+8+th,scrw-8,512)
+                render.setColor(Color(255,255,255))
+                render.drawText(8,4+8+th,"Missing permission:")
+
+                local next_h = th+12
+                for key, perm_id in pairs(missing_perms) do
+                    local tw, th = render.getTextSize(perm_id)
+                    next_h = next_h + th + 10
+                    
+                    tw = 200
+
+                    render.setColor(Color(200,30,30))
+                    render.drawRect(20,next_h,tw,th+4)
+
+                    render.setColor(Color(255,255,255))
+                    render.drawSimpleText(24,next_h + 2 + th/2,perm_id,0,1)
+                end
+            end
+        end)
+    
+        hook.add("permissionrequest", "perms_"..uid, function()
+            if permissionRequestSatisfied() then
+                hook.remove("permissionrequest", "perms_"..uid)
+                hook.remove("render", "noperm_message_"..uid)
+    
+                on_accept()
+            end
+        end)
+        has_active_permission = true
+    else
+        error("Not a valid perms table.")
+    end
+end
+
+local function can_create()
+    return not has_active_permission
+end
+
+return {setup_permission=setup_permission,can_create=can_create}
