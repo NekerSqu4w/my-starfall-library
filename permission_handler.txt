@@ -1,12 +1,12 @@
 --@include https://raw.githubusercontent.com/NekerSqu4w/my-starfall-library/main/uuid.txt as uuid.txt
-local uuid = require("uuid.txt").uuid
+local uuid = require("uuid.txt")
 
 local has_active_permission = false
 local function setup_permission(perms,perm_info,on_accept,override_perm_screen)
     perms = perms or {"render.screen"}
     perm_info = perm_info or "Accept permission"
     
-    local uid = uuid(6,4)
+    local uid = uuid.uuid(6,4)
     local missing_perms = {}
 
     if type(perms) == "table" and has_active_permission == false then
