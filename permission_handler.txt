@@ -1,18 +1,25 @@
 local uuid = require("uuid.txt")
 
 local has_active_permission = false
-local function setup_permission(perms,perm_info,on_accept,override_perm_screen)
+local function setup_permission(perms,perm_info,on_accept,on_error,override_perm_screen)
     perms = perms or {"render.screen"}
     perm_info = perm_info or "Accept permission"
     
     local uid = uuid.uuid(6,4)
     local missing_perms = {}
 
+    if not can_create() then
+        if type(on_error) == "function" then
+            on_error("Unable to create another permission configuration when one is already in use.")
+            return
+        end
+    end
+
     if type(perms) == "table" and has_active_permission == false then
         table.insert(missing_perms,"render.screen")
         for key, perm_id in pairs(perms) do
             if hasPermission(perm_id) then else
-                missing_perms[#missing_perms+1] = perm_id
+                table.insert(missing_perms, perm_id)
             end
         end
 
@@ -66,7 +73,7 @@ local function setup_permission(perms,perm_info,on_accept,override_perm_screen)
         end)
         has_active_permission = true
     else
-        error("Not a valid perms table.")
+        if type(on_error) == "function" then on_error("Not a valid perms table.") end
     end
 end
 

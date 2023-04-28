@@ -5,8 +5,8 @@ Trasnform any screen into an retro computer screen
 
 To use
 
---@include lib/retro_screen.txt
-local retro_screen = require("lib/retro_screen.txt")
+--@include https://raw.githubusercontent.com/NekerSqu4w/my-starfall-library/main/retro_screen.txt as retro_screen.txt
+local retro_screen = require("retro_screen.txt")
     
 retro_screen.push()
 
@@ -77,7 +77,7 @@ function draw_retro(w,h,antialias)
     render.drawTexturedRect(0,0,1024*scl1,1024*scl2)
     render.selectRenderTarget(nil)
 
-    
+
     //draw the new target 1024x1024
     render.setColor(Color(255,255,255))
     render.setRenderTargetTexture(retro.final_target)
