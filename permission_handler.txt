@@ -1,6 +1,10 @@
 local uuid = require("uuid.txt")
 
 local has_active_permission = false
+local function can_create()
+    return not has_active_permission
+end
+
 local function setup_permission(perms,perm_info,on_accept,on_error,override_perm_screen)
     perms = perms or {"render.screen"}
     perm_info = perm_info or "Accept permission"
@@ -75,10 +79,6 @@ local function setup_permission(perms,perm_info,on_accept,on_error,override_perm
     else
         if type(on_error) == "function" then on_error("Not a valid perms table.") end
     end
-end
-
-local function can_create()
-    return not has_active_permission
 end
 
 return {setup_permission=setup_permission,can_create=can_create}
