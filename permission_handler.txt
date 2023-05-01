@@ -1,5 +1,3 @@
-local uuid = require("uuid.txt")
-
 local has_active_permission = false
 local function can_create()
     return not has_active_permission
@@ -30,7 +28,7 @@ local function setup_permission(perms,perm_info,on_accept,on_error,override_perm
         local perminfo = "Hello, you are missing some permission\nthat I need to work properly..\n\nPress your use key on this screen\nto accept these permission !"
         setupPermissionRequest(missing_perms, perm_info, true)
         local permission_font = render.createFont("FontAwesome",20,600,true,false,false,false,0,false,0)
-        hook.add("render","noperm_message_"..uid,function()
+        hook.add("render","noperm_message",function()
             local scrw,scrh = render.getResolution()
             if type(override_perm_screen) == "function" then
                 override_perm_screen(scrw,scrh,missing_perms)
@@ -67,10 +65,10 @@ local function setup_permission(perms,perm_info,on_accept,on_error,override_perm
             end
         end)
     
-        hook.add("permissionrequest", "perms_"..uid, function()
+        hook.add("permissionrequest", "perms", function()
             if permissionRequestSatisfied() then
-                hook.remove("permissionrequest", "perms_"..uid)
-                hook.remove("render", "noperm_message_"..uid)
+                hook.remove("permissionrequest", "perms")
+                hook.remove("render", "noperm_message")
     
                 on_accept()
             end
