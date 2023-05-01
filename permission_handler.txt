@@ -6,8 +6,6 @@ end
 local function setup_permission(perms,perm_info,on_accept,on_error,override_perm_screen)
     perms = perms or {"render.screen"}
     perm_info = perm_info or "Accept permission"
-    
-    local uid = uuid.uuid(6,4)
     local missing_perms = {}
 
     if not can_create() then
