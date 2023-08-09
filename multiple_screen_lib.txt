@@ -1,8 +1,9 @@
 local my_lib = {}
 my_lib.screen_ent = {}
 my_lib.font = render.createFont("Courier New", 45, 100, true, false, false, false, false, true)
+my_lib.screen = {}
 
-function update(show_id)
+my_lib.update = function(show_id)
     //some value we need to work
     my_lib.show_id = show_id or false
     my_lib.screen_list = chip():getLinkedComponents()
@@ -12,15 +13,20 @@ function update(show_id)
 
     my_lib.res = {}
     my_lib.res.w,my_lib.res.h = render.getResolution()
-    my_lib.screen_index = my_lib.screen_ent[render.getScreenEntity()]
+    my_lib.screen_index = my_lib.screen_ent[render.getScreenEntity()] or 0
     
 
     my_lib.cursor = {visible=true}
-    my_lib.cursor.x, my_lib.cursor.y = render.cursorPos(player())
+    if render.getScreenEntity() then my_lib.cursor.x, my_lib.cursor.y = render.cursorPos(player())
+    else my_lib.cursor.x, my_lib.cursor.y = input.getCursorPos() end
     if my_lib.cursor.x == nil or my_lib.cursor.y == nil then my_lib.cursor = {x=0,y=0,visible=false} end
     
     //run the hook
+    render.setColor(Color(255,255,255))
     hook.run("ms_render"..my_lib.screen_index,my_lib.screen_index,my_lib.res,my_lib.cursor)
+
+    render.setColor(Color(255,255,255))
+    if type(my_lib.screen[my_lib.screen_index]) == "function" then my_lib.screen[my_lib.screen_index](my_lib.screen_index,my_lib.res,my_lib.cursor) end
 
     //show screen id
     if my_lib.show_id then
@@ -37,4 +43,4 @@ function update(show_id)
     return my_lib.screen_index
 end
 
-return {update=update}
+return my_lib
