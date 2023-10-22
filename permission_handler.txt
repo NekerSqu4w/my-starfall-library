@@ -67,6 +67,8 @@ local function setup_permission(perms,perm_info,on_accept,on_error,override_perm
             if permissionRequestSatisfied() then
                 hook.remove("permissionrequest", "perms")
                 hook.remove("render", "noperm_message")
+
+                has_active_permission = false
     
                 on_accept()
             end
