@@ -4,9 +4,6 @@
 
 local polyBuffer = {} //to reduce lag
 
-render = table.copy(render)
-math = table.copy(math)
-
 render.drawRoundedBox2 = function(r1,r2,r3,r4,x,y,w,h,segments)
     r1 = r1 or h/2
     r2 = r2 or h/2
@@ -258,5 +255,3 @@ function math.generate_gradient(colors, steps)
     table.insert(gradient, colors[#colors])
     return gradient
 end
-
-return render,math
