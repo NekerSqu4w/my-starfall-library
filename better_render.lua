@@ -235,7 +235,7 @@ render.createTextureNormal = function(_xo, _yo, _wo, _ho)
 end
 
 /* EXPERIMENTAL but it's should work */
-function math.interpolate_color(color1, color2, progress)
+function math.lerpColor(progress, color1, color2)
     local r = math.floor(color1.r + (color2.r - color1.r) * progress)
     local g = math.floor(color1.g + (color2.g - color1.g) * progress)
     local b = math.floor(color1.b + (color2.b - color1.b) * progress)
