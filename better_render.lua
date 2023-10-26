@@ -248,7 +248,7 @@ function math.generate_gradient(colors, steps)
     for i=1,#colors-1 do
         for j=0,steps-1 do
             local progress = j / (steps-1)
-            local color = math.linear_interpolate(colors[i], colors[i+1], progress)
+            local color = math.lerpColor(progress, colors[i], colors[i+1])
             table.insert(gradient, color)
         end
     end
