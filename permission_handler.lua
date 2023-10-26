@@ -23,7 +23,7 @@ local function setup_permission(perms,perm_info,on_accept,on_error,override_perm
             end
         end
 
-        local perminfo = "Hello, you are missing some permission\nthat I need to work properly..\n\nPress your use key on this screen\nto accept these permission !"
+        local perminfo = "Hello, you are missing an authorization\nthat I need to function correctly.\n\nPress your use key on this screen\nto accept these authorization !"
         setupPermissionRequest(missing_perms, perm_info, true)
         local permission_font = render.createFont("FontAwesome",20,600,true,false,false,false,0,false,0)
         hook.add("render","noperm_message",function()
