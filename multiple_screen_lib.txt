@@ -1,46 +1,61 @@
-local my_lib = {}
-my_lib.screen_ent = {}
-my_lib.font = render.createFont("Courier New", 45, 100, true, false, false, false, false, true)
-my_lib.screen = {}
+local msl = class("multi_screen_rendering")
+msl.debug_font = render.createFont("Courier New", 45, 0, true)
 
-my_lib.update = function(show_id)
-    //some value we need to work
-    my_lib.show_id = show_id or false
-    my_lib.screen_list = chip():getLinkedComponents()
-    for _, screen in pairs(my_lib.screen_list) do
-        my_lib.screen_ent[screen] = _
-    end
-
-    my_lib.res = {}
-    my_lib.res.w,my_lib.res.h = render.getResolution()
-    my_lib.screen_index = my_lib.screen_ent[render.getScreenEntity()] or 0
+function msl:initialize(screen_list)
+    self.screen_list = chip():getLinkedComponents()
+    self.screen_index = {}
+    self.screen = {}
     
-
-    my_lib.cursor = {visible=true}
-    if render.getScreenEntity() then my_lib.cursor.x, my_lib.cursor.y = render.cursorPos(player())
-    else my_lib.cursor.x, my_lib.cursor.y = input.getCursorPos() end
-    if my_lib.cursor.x == nil or my_lib.cursor.y == nil then my_lib.cursor = {x=0,y=0,visible=false} end
-    
-    //run the hook
-    render.setColor(Color(255,255,255))
-    hook.run("ms_render"..my_lib.screen_index,my_lib.screen_index,my_lib.res,my_lib.cursor)
-
-    render.setColor(Color(255,255,255))
-    if type(my_lib.screen[my_lib.screen_index]) == "function" then my_lib.screen[my_lib.screen_index](my_lib.screen_index,my_lib.res,my_lib.cursor) end
-
-    //show screen id
-    if my_lib.show_id then
-        render.setColor(Color(255,70,70))
-        render.drawRectOutline(0,0,my_lib.res.w,my_lib.res.h)
-
-        render.setColor(Color(255,70,70,150))
-        render.drawRect(20,0,60,60)
-        render.setFont(my_lib.font)
-        render.setColor(Color(255,255,255))
-        render.drawSimpleText(20 + 30,0 + 30,tostring(my_lib.screen_index),1,1)
+    // make rt for screen
+    for index, entity in pairs(self.screen_list) do
+        render.createRenderTarget("mdl_rt_" .. entity:entIndex())
+        self.screen_index[entity] = index
     end
-
-    return my_lib.screen_index
 end
 
-return my_lib
+function msl:update(show_id)
+    local scrw, scrh = render.getResolution()
+    local s = math.ceil(math.max(scrw, scrh))
+    
+    local screen_entity = render.getScreenEntity()
+    local screen_index = self.screen_index[screen_entity]
+    local initialized = screen_index and true or false
+    local curx, cury = render.cursorPos()
+    local screen_rt = "mdl_rt_" .. screen_entity:entIndex()
+    
+    if initialized == false then
+        render.setFont(msl.debug_font)
+        render.setRGBA(255,255,255,255)
+        render.drawSimpleText(scrw / 2,scrh / 2,"no signal",1,1)
+        
+        return
+    end
+    
+    
+    render.setFont(render.getDefaultFont())
+    render.selectRenderTarget(screen_rt)
+    
+    if self.screen[screen_index] then
+        self.screen[screen_index](scrw,scrh,curx,cury)
+    end
+    
+    render.selectRenderTarget()
+    
+    render.setRGBA(255,255,255,255)
+    render.setRenderTargetTexture(screen_rt)
+    render.drawTexturedRect(0,0,(1024 / scrw) * s,(1024 / scrw) * s)
+    
+    
+    if show_id then
+        render.setRGBA(255,70,70,255)
+        render.drawRectOutline(0,0,scrw,scrh)
+        
+        render.setRGBA(255,70,70,150)
+        render.drawRect(20,0,60,60)
+        render.setFont(msl.debug_font)
+        render.setRGBA(255,255,255,255)
+        render.drawSimpleText(20 + 30,30,tostring(screen_index),1,1)
+    end
+end
+
+return msl
