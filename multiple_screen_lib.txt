@@ -13,6 +13,17 @@ function msl:initialize(screen_list)
     end
 end
 
+function msl:setup_screen(screen_list)
+    self.screen_list = screen_list or chip():getLinkedComponents()
+    
+    for index, entity in pairs(self.screen_list) do
+        if render.renderTargetExists("mdl_rt_" .. entity:entIndex()) == false then
+            render.createRenderTarget("mdl_rt_" .. entity:entIndex())
+        end
+        self.screen_index[entity] = index
+    end
+end
+
 function msl:update(show_id)
     local scrw, scrh = render.getResolution()
     local s = math.ceil(math.max(scrw, scrh))
