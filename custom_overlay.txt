@@ -7,7 +7,7 @@ if CLIENT then
     render.setChipOverlay("custom_overlay")
     
     
-    local star_icon = material.createFromImage("radon/starfall2.png", "")
+    local default_icon = material.createFromImage("radon/starfall2.png", "")
     
     
     local padding = 30
@@ -21,6 +21,10 @@ if CLIENT then
     local cl_usage = 0
     local cl_max_usage = cpuMax()
     
+    local use_icon
+    
+    function set_icon(mat) use_icon = mat end
+    
     local function drawStatusBar(label, valueText, fillPercent, fillColor, offsetY, barWidth)
         render.setRGBA(238, 238, 238, 255)
         render.drawSimpleText(padding, offsetY, label .. ": " .. valueText)
@@ -32,7 +36,6 @@ if CLIENT then
         render.setColor(fillColor)
         render.drawRectFast(padding, 70 + offsetY, fillW, padding)
     end
-    
     
     local function render_overlay(x,y,w,h)
         cl_usage_smooth = math.lerp(timer.frametime() * 25, cl_usage_smooth or 0, cl_usage)
@@ -47,8 +50,8 @@ if CLIENT then
         render.setRGBA(51, 54, 64, 255)
         render.drawRoundedBox(42, 0, 0, w, h)
         
-        render.setMaterial(star_icon)
-        render.setRGBA(68, 202, 229, 180)
+        render.setMaterial(use_icon or default_icon)
+        render.setRGBA(255, 255, 255, 255)
         render.drawTexturedRect(padding, padding, iconSize, iconSize)
         
         
@@ -94,6 +97,10 @@ if CLIENT then
         cl_usage = cpuAverage()
         update_overlay()
     end)
+    
+    return {
+        set_icon = set_icon
+    }
 end
 
 if SERVER then
