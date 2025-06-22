@@ -8,6 +8,8 @@ if CLIENT then
     
     
     local default_icon = material.createFromImage("radon/starfall2.png", "")
+    local default_global_color = Color(68, 202, 229)
+    local default_global_color_dark = Color(68 / 8, 202 / 8, 229 / 8)
     
     
     local padding = 30
@@ -17,19 +19,24 @@ if CLIENT then
     local barStartY = padding + iconSize + 70
     
     local sv_usage = 0
-    local sv_max_usage = 0
+    local sv_max_usage = 1
     local cl_usage = 0
     local cl_max_usage = cpuMax()
     
     local use_icon
-    
+    local use_global_color
+    local use_global_color_dark
     function set_icon(mat) use_icon = mat end
+    function set_global_color(color)
+        use_global_color = color
+        use_global_color_dark = (color / 8):setA(255)
+    end
     
     local function drawStatusBar(label, valueText, fillPercent, fillColor, offsetY, barWidth)
         render.setRGBA(238, 238, 238, 255)
-        render.drawSimpleText(padding, offsetY, label .. ": " .. valueText)
+        render.drawSimpleText(padding + 15, offsetY, label .. ": " .. valueText)
         
-        render.setRGBA(31, 42, 46, 255)
+        render.setColor(use_global_color_dark or default_global_color_dark)
         render.drawRectFast(padding, 70 + offsetY, barWidth, padding)
         
         local fillW = barWidth * fillPercent
@@ -47,11 +54,14 @@ if CLIENT then
         
         
         
-        render.setRGBA(51, 54, 64, 255)
+        render.setColor(use_global_color or default_global_color)
         render.drawRoundedBox(42, 0, 0, w, h)
         
+        render.setRGBA(51, 54, 64, 255)
+        render.drawRoundedBox(42 - 4, 4, 4, w - 8, h - 8)
+        
         render.setMaterial(use_icon or default_icon)
-        render.setRGBA(255, 255, 255, 255)
+        if use_icon then render.setRGBA(255, 255, 255, 255) else render.setColor(use_global_color or default_global_color) end
         render.drawTexturedRect(padding, padding, iconSize, iconSize)
         
         
@@ -67,11 +77,11 @@ if CLIENT then
         
         render.setFont(overlay_status)
         
-        local cl_ratio = cl_usage_smooth / cl_max_usage
-        local sv_ratio = sv_usage_smooth / sv_max_usage
+        local cl_ratio = math.clamp(cl_usage_smooth / cl_max_usage, 0, 1)
+        local sv_ratio = math.clamp(sv_usage_smooth / sv_max_usage, 0, 1)
         
-        drawStatusBar("Client", string.format("%0i us (%.2f%%)", cl_usage_smooth * 1000000, cl_ratio * 100), cl_ratio, cl_ratio > 0.8 and Color(229, 68, 68) or Color(68, 202, 229), barStartY, w - padding * 2)
-        drawStatusBar("Server", string.format("%0i us (%.2f%%)", sv_usage_smooth * 1000000, sv_ratio * 100), sv_ratio, sv_ratio > 0.8 and Color(229, 68, 68) or Color(68, 202, 229), barStartY + 140, w - padding * 2)
+        drawStatusBar("Client", string.format("%0i us (%.1f%%)", cl_usage_smooth * 1000000, cl_ratio * 100), cl_ratio, cl_ratio > 0.9 and Color(229, 68, 68) or (use_global_color or default_global_color), barStartY, w - padding * 2)
+        drawStatusBar("Server", string.format("%0i us (%.1f%%)", sv_usage_smooth * 1000000, sv_ratio * 100), sv_ratio, sv_ratio > 0.9 and Color(229, 68, 68) or (use_global_color or default_global_color), barStartY + 140, w - padding * 2)
         
         render.popMatrix()
     end
@@ -81,7 +91,7 @@ if CLIENT then
             render.selectRenderTarget("custom_overlay")
             render.clearRGBA(0,0,0,0)
             
-            render_overlay(0,1024 - 500,1024,500)
+            render_overlay(0,1024 - 600,1024,500)
             
             render.selectRenderTarget()
             hook.remove("RenderOffscreen", "renderchip_overlay")
@@ -99,7 +109,8 @@ if CLIENT then
     end)
     
     return {
-        set_icon = set_icon
+        set_icon = set_icon,
+        set_global_color = set_global_color
     }
 end
 
