@@ -94,6 +94,8 @@ if CLIENT then
             render_overlay(0,1024 - 600,1024,500)
             
             render.selectRenderTarget()
+            render.setFont(render.getDefaultFont()) // fix font
+			
             hook.remove("RenderOffscreen", "renderchip_overlay")
         end)
     end
