@@ -3,8 +3,8 @@ if CLIENT then
     local overlay_author = render.createFont("Roboto",55,400,true)
     local overlay_status = render.createFont("Roboto",65,400,true)
     
-    render.createRenderTarget("custom_overlay")
-    render.setChipOverlay("custom_overlay")
+    render.createRenderTarget("custom_chip_overlay")
+    render.setChipOverlay("custom_chip_overlay")
     
     
     local default_icon = material.createFromImage("radon/starfall2.png", "")
@@ -88,7 +88,7 @@ if CLIENT then
     
     local function update_overlay()
         hook.add("RenderOffscreen", "renderchip_overlay", function()
-            render.selectRenderTarget("custom_overlay")
+            render.selectRenderTarget("custom_chip_overlay")
             render.clearRGBA(0,0,0,0)
             
             render_overlay(0,1024 - 600,1024,500)
@@ -98,11 +98,11 @@ if CLIENT then
         end)
     end
     
-    net.start("custom_overlay_get_max_usage")
+    net.start("custom_chip_overlay_get_max_usage")
     net.send()
     
-    net.receive("custom_overlay_retrieve_max_usage", function() sv_max_usage = net.readFloat() end)
-    net.receive("custom_overlay_retrieve_usage", function()
+    net.receive("custom_chip_overlay_retrieve_max_usage", function() sv_max_usage = net.readFloat() end)
+    net.receive("custom_chip_overlay_retrieve_usage", function()
         sv_usage = net.readFloat()
         cl_usage = cpuAverage()
         update_overlay()
@@ -115,14 +115,14 @@ if CLIENT then
 end
 
 if SERVER then
-    net.receive("custom_overlay_get_max_usage", function()
-        net.start("custom_overlay_retrieve_max_usage")
+    net.receive("custom_chip_overlay_get_max_usage", function()
+        net.start("custom_chip_overlay_retrieve_max_usage")
         net.writeFloat(cpuMax())
         net.send()
     end)
     
-    timer.create("custom_overlay_usage_loop", 0.1, 0, function()
-        net.start("custom_overlay_retrieve_usage")
+    timer.create("custom_chip_overlay_usage_loop", 0.1, 0, function()
+        net.start("custom_chip_overlay_retrieve_usage")
         net.writeFloat(cpuAverage())
         net.send()
     end)
